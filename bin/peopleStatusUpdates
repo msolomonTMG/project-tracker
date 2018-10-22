@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+const slack = require('../slack')
+const airtable = require('../airtable')
+
+// const dayOfWeek = new Date().getDay();
+// const isWeekend = (dayOfWeek == 6) || (dayOfWeek == 0); // 6 = Saturday, 0 = Sunday
+// 
+// if (isWeekend) {
+//   return false // do not run this on the weekends
+// }
+console.log('here we go')
+airtable.getRecordsFromView('Status Updates', 'This Week\'s Status Report', [{field: "Team Name", direction: "desc"}])
+  .then(statusUpdates => {
+    console.log(statusUpdates)
+    slack.sendPeopleStatusReport(statusUpdates)
+  })
+
