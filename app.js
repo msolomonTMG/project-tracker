@@ -80,14 +80,15 @@ app.post('/dialog-options-load', async function(req, res) {
     case 'project':
       let projects = await airtable.getRecordsFromView('Projects', {
         view: 'All Projects',
-        sortOptions: [{field: "Name", direction: "asc"}],
+        sort: [{field: "Name", direction: "asc"}],
+        filterByFormula: `FIND(LOWER("${payload.value}"), LOWER(Name), 0)`,
         maxRecords: 100
       })
       let optionGroups = []
       for (const project of projects) {
         optionGroups = await utils.formatProjectDialogOptions(optionGroups, project)
       }
-
+    
       res.status(200).send({
         option_groups: optionGroups
       })

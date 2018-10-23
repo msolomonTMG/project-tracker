@@ -121,6 +121,7 @@ module.exports = {
             label: 'Project',
             name: 'project',
             type: 'select',
+            min_query_length: 2,
             data_source: 'external'
           },
           {
