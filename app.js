@@ -2,6 +2,7 @@ const
   express = require('express'),
   bodyParser = require('body-parser'),
   airtable = require('./airtable'),
+  utils = require('./utils'),
   slack = require('./slack');
 
 let app = express()
@@ -46,25 +47,14 @@ app.post('/dialog-options-load', async function(req, res) {
   // we can tell what dialog field we're populating by the name
   switch(payload.name) {
     case 'project':
-      console.log('finding projects')
       let projects = await airtable.getRecordsFromView('Projects', 'All Projects',[{field: "Name", direction: "asc"}], 100)
-      let options = []
-      for (project of projects) {
-        let projectName = project.get('Name')
-        if (projectName.length > 24) {
-          // if name > 24 chars,strip to 21 chars and add three dots
-          projectName = projectName.substring(0, 21).concat('...')
-        }
-        
-        options.push({
-          label: `${projectName}`,
-          value: `${project.id}`
-        })
+      let optionGroups = []
+      for (const project of projects) {
+        optionGroups = await utils.formatProjectDialogOptions(optionGroups, project)
       }
-      console.log('OPTIONS')
-      console.log(options)
+
       res.status(200).send({
-        options: options
+        option_groups: optionGroups
       })
       break;
   }
