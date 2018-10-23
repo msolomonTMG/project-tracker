@@ -88,6 +88,12 @@ module.exports = {
         submit_label: 'Create',
         elements: [
           {
+            label: 'Project',
+            name: 'project',
+            type: 'select',
+            data_source: 'external'
+          },
+          {
             type: 'textarea',
             name: 'description',
             label: 'Description',

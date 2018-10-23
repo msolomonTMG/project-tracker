@@ -3,6 +3,7 @@ const base = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(process.e
 
 module.exports = {
   getRecordsFromView (tableName, viewName, sortOptions, maxRecords) {
+    console.log('getting airtable records')
     return new Promise((resolve, reject) => {
       
       let recordsToReturn = []
