@@ -37,6 +37,28 @@ app.post('/interactivity', async function(req, res) {
       // but in the future we may want to check what to do here
       const newStatus = await airtable.createStatusUpdateFromDialog(payload.submission)
       console.log(newStatus)
+      slack.sendEphemeralMessage({
+        channel: payload.channel.id,
+        userId: payload.user.id,
+        text: ':white_check_mark: Status created successfully!',
+        attachments: [
+          {
+            title: newStatus.get('Project Name')[0],
+            fields: [
+              {
+                title: 'Status',
+                value: newStatus.get('Status'),
+                short: true
+              },
+              {
+                title: 'Description',
+                value: newStatus.get('Description'),
+                short: false
+              }
+            ]
+          }
+        ]
+      })
       break;
   }
   
