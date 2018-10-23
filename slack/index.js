@@ -176,7 +176,7 @@ module.exports = {
         console.log(statusUpdate)
         attachments.push({
           color: helpers.getStatusColor(statusUpdate.get('Status')),
-          title: statusUpdate.get('Project Name')[0],
+          title: statusUpdate.get('Project Name') ? statusUpdate.get('Project Name')[0] : '',
           title_link: `https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${statusesView}/${statusUpdate.id}`,
           fields: [
             {
@@ -186,12 +186,12 @@ module.exports = {
             },
             {
               title: 'Progress',
-              value: `${Math.round(statusUpdate.get('Project Progress')[0])}%`,
+              value: statusUpdate.get('Project Progress') ? `${Math.round(statusUpdate.get('Project Progress')[0])}%` : '',
               short: true
             },
             {
               title: 'Owner',
-              value: statusUpdate.get('Project Owner Name')[0],
+              value: statusUpdate.get('Project Owner Name') ? statusUpdate.get('Project Owner Name')[0] : '',
               short: true
             },
             {

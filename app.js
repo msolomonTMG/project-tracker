@@ -78,7 +78,11 @@ app.post('/dialog-options-load', async function(req, res) {
   // we can tell what dialog field we're populating by the name
   switch(payload.name) {
     case 'project':
-      let projects = await airtable.getRecordsFromView('Projects', 'All Projects',[{field: "Name", direction: "asc"}], 100)
+      let projects = await airtable.getRecordsFromView('Projects', {
+        view: 'All Projects',
+        sortOptions: [{field: "Name", direction: "asc"}],
+        maxRecords: 100
+      })
       let optionGroups = []
       for (const project of projects) {
         optionGroups = await utils.formatProjectDialogOptions(optionGroups, project)
