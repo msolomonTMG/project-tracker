@@ -33,5 +33,17 @@ module.exports = {
       })
       
     })
+  },
+  createStatusUpdateFromDialog (dialogSubmission) {
+    return new Promise((resolve, reject) => {
+      base('Status Updates').create({
+        'Project': [ dialogSubmission.project ],
+        'Description': dialogSubmission.description,
+        'Status': dialogSubmission.status
+      }, (err, record) => {
+        if (err) { console.error(err); return reject(err); }
+        return resolve(record)
+      })
+    })
   }
 }

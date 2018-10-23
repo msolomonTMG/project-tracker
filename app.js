@@ -30,6 +30,15 @@ app.post('/project-status', async function(req, res) {
 app.post('/interactivity', async function(req, res) {
   console.log('/INTERACTIVITY')
   console.log(req.body)
+  const payload = JSON.parse(req.body.payload)
+  switch(payload.type) {
+    case 'dialog_submission':
+      // we currently only have project status dialogs
+      // but in the future we may want to check what to do here
+      const newStatus = await airtable.createStatusUpdateFromDialog(payload.submission)
+      console.log(newStatus)
+      break;
+  }
   
   // do something here before returning empty body
   res.setHeader('Content-Type', 'application/json')
