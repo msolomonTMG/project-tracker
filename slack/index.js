@@ -27,6 +27,33 @@ const helpers = {
         break;
     }
   },
+  openDialog (dialog, triggerId) {
+    console.log('dialog helper')
+    return new Promise((resolve, reject) => {
+      
+      const options = {
+        method: 'post',
+        body: {
+          trigger_id: triggerId,
+          dialog: dialog
+        },
+        json: true,
+        url: `https://slack.com/api/dialog.open`,
+        headers: {
+          'Authorization': `Bearer ${process.env.SLACK_OAUTH_TOKEN}`,
+          'Content-type': 'application/json',
+          'charset': 'UTF-8'
+        }
+      }
+      
+      request(options, (err, response, body) => {
+        if (err) { console.error(err); return reject(err); }
+        console.log(body)
+        return resolve(body)
+      })
+      
+    })
+  },
   sendSlackMessage (url, text, attachments) {
     return new Promise((resolve, reject) => {
       
@@ -52,6 +79,26 @@ const helpers = {
 }
 
 module.exports = {
+  openStatusDialog (triggerId) {
+    console.log('opening status dialog')
+    return new Promise((resolve, reject) => {
+      const dialog = {
+        callback_id: 'random_string',
+        title: 'Project Status Update',
+        submit_label: 'Create',
+        elements: [
+          {
+            type: 'textarea',
+            name: 'description',
+            label: 'Description',
+            hint: 'What\'s your update?'
+          }
+        ]
+      }
+      
+      helpers.openDialog(dialog, triggerId)
+    })
+  },
   sendPeopleStatusReport (statusUpdates) {
     return new Promise((resolve, reject) => {
       const statusesView = 'viwRGjGfoLTHUYjBc'
