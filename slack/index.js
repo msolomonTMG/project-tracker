@@ -94,6 +94,37 @@ module.exports = {
             data_source: 'external'
           },
           {
+            label: 'Status',
+            name: 'status',
+            type: 'select',
+            options: [
+              {
+                label: 'Green',
+                value: 'Green'
+              },
+              {
+                label: 'Yellow',
+                value: 'Yellow'
+              },
+              {
+                label: 'Red',
+                value: 'Red'
+              },
+              {
+                label: 'Planning',
+                value: 'Planning'
+              },
+              {
+                label: 'Blocked Internal',
+                value: 'Blocked Internal'
+              },
+              {
+                label: 'Blocked External',
+                value: 'Blocked External'
+              }
+            ]
+          },
+          {
             type: 'textarea',
             name: 'description',
             label: 'Description',
