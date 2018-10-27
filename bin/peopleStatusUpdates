@@ -10,9 +10,11 @@ const airtable = require('../airtable')
 //   return false // do not run this on the weekends
 // }
 console.log('here we go')
-airtable.getRecordsFromView('Status Updates', 'This Week\'s Status Report', [{field: "Team Name", direction: "desc"}])
+airtable.getRecordsFromView('Status Updates', {
+  view: 'This Week\'s Status Report',
+  sort: [{field: "Team Name", direction: "desc"}]
+})
   .then(statusUpdates => {
     console.log(statusUpdates)
     slack.sendPeopleStatusReport(statusUpdates)
   })
-
