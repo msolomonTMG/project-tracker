@@ -211,7 +211,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const dialog = {
         callback_id: 'random_string',
-        title: 'Create a Project Status Update',
+        title: 'Project Status Update',
         submit_label: 'Create',
         elements: [
           {
