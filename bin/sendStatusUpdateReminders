@@ -59,7 +59,7 @@ async function sendStatusUpdateReminders() {
         callback_id: `${project.id}`,
         actions: [
           {
-            name: 'status',
+            name: `${project.get('Name')}`,
             text: 'Create Status Update',
             type: 'button',
             value: 'create_status'

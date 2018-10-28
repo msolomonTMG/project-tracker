@@ -138,6 +138,64 @@ module.exports = {
       })
     })
   },
+  openStatusForSpecificProjectDialog (triggerId, projectId, projectName) {
+    console.log(`trigger id is ${triggerId}`)
+    return new Promise((resolve, reject) => {
+      if (projectName.length > 24) {
+        // if name > 24 chars,strip to 21 chars and add three dots
+        projectName = projectName.substring(0, 21).concat('...')
+      }
+      const dialog = {
+        callback_id: projectId,
+        title: `${projectName}`,
+        submit_label: 'Create',
+        elements: [
+          {
+            label: 'Status',
+            name: 'status',
+            type: 'select',
+            options: [
+              {
+                label: 'Green',
+                value: 'Green'
+              },
+              {
+                label: 'Yellow',
+                value: 'Yellow'
+              },
+              {
+                label: 'Red',
+                value: 'Red'
+              },
+              {
+                label: 'Planning',
+                value: 'Planning'
+              },
+              {
+                label: 'Blocked Internal',
+                value: 'Blocked Internal'
+              },
+              {
+                label: 'Blocked External',
+                value: 'Blocked External'
+              },
+              {
+                label: 'Backlog',
+                value: 'Backlog'
+              }
+            ]
+          },
+          {
+            type: 'textarea',
+            name: 'description',
+            label: 'Description',
+            hint: 'What\'s your update?'
+          }
+        ]
+      }
+      helpers.openDialog(dialog, triggerId)
+    })
+  },
   openStatusDialog (triggerId) {
     console.log('opening status dialog')
     return new Promise((resolve, reject) => {
@@ -181,6 +239,10 @@ module.exports = {
               {
                 label: 'Blocked External',
                 value: 'Blocked External'
+              },
+              {
+                label: 'Backlog',
+                value: 'Backlog'
               }
             ]
           },
