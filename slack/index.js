@@ -79,6 +79,35 @@ const helpers = {
 }
 
 module.exports = {
+  sendPrivateMessage (messageOptions) {
+    return new Promise((resolve, reject) => {
+      let postData = {
+        channel: messageOptions.channel,
+        text: messageOptions.text
+      }
+      
+      if (messageOptions.attachments) {
+        postData.attachments = messageOptions.attachments
+      }
+      
+      const options = {
+        method: 'post',
+        body: postData,
+        json: true,
+        url: `https://slack.com/api/chat.postMessage`,
+        headers: {
+          'Authorization': `Bearer ${process.env.SLACK_OAUTH_TOKEN}`,
+          'Content-type': 'application/json',
+          'charset': 'UTF-8'
+        }
+      }
+      
+      request(options, (err, response, body) => {
+        if (err) { console.error(err); return reject(err); }
+        return resolve(body)
+      })
+    })
+  },
   sendEphemeralMessage (messageOptions) {
     return new Promise((resolve, reject) => {
       let postData = {

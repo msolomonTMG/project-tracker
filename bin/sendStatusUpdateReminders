@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+
+const slack = require('../slack')
+const airtable = require('../airtable')
+
+// const dayOfWeek = new Date().getDay();
+// const isWeekend = (dayOfWeek == 6) || (dayOfWeek == 0); // 6 = Saturday, 0 = Sunday
+// 
+// if (isWeekend) {
+//   return false // do not run this on the weekends
+// }
+sendStatusUpdateReminders()
+
+async function sendStatusUpdateReminders() {
+  console.log('here we go')
+  // get all projects that are not done and whose owners 
+  // have Slack User IDs and have opted in for reminders
+  const projects = await airtable.getRecordsFromView('Projects', {
+    view: 'All Projects',
+    sort: [{field: "Owner Slack User ID", direction: "desc"}],
+    filterByFormula: `IF({Owner Slack User ID}!='', IF({Send Slack Status Reminders}=1, IF(Done=0, TRUE(), FALSE()), FALSE()), FALSE())`
+  })
+  
+  // group projects by their owner
+  let projectsByOwner = {}
+  for (const project of projects) {
+    if (!projectsByOwner[project.get('Owner Slack User ID')[0]]) {
+      projectsByOwner[project.get('Owner Slack User ID')[0]] = []
+    }
+    projectsByOwner[project.get('Owner Slack User ID')[0]].push(project)
+  }
+  
+  // loop over each owner and their projects
+  Object.entries(projectsByOwner).forEach(([owner, projects]) => {
+    console.log('user: ' + owner)
+    console.log('projects: ' + projects)
+    
+    let attachments = []
+    for (const project of projects) {
+      attachments.push({
+        title: project.get('Name'),
+        fields: [
+          {
+            title: 'Latest Status',
+            value: project.get('Latest Status') ? project.get('Latest Status')[0] : '',
+            short: true
+          },
+          {
+            title: 'Last Updated',
+            value: project.get('Last Updated'),
+            short: true
+          },
+          {
+            title: 'Latest Update',
+            value: project.get('Latest Update') ? project.get('Latest Update')[0] : '',
+            short: false
+          }
+        ],
+        callback_id: `${project.id}`,
+        actions: [
+          {
+            name: 'status',
+            text: 'Create Status Update',
+            type: 'button',
+            value: 'create_status'
+          }
+        ]
+      })
+    }
+    slack.sendPrivateMessage({
+      channel: owner,
+      text: 'Here are some projects that need updates',
+      attachments: attachments
+    })
+    console.log(attachments)
+  })
+  
+}
