@@ -14,12 +14,12 @@ sendStatusUpdateReminders()
 
 async function sendStatusUpdateReminders() {
   console.log('here we go')
-  // get all projects that are not done and whose owners 
+  // get all projects that are not done, not backlogged, whose owners 
   // have Slack User IDs and have opted in for reminders
   const projects = await airtable.getRecordsFromView('Projects', {
     view: 'All Projects',
     sort: [{field: "Owner Slack User ID", direction: "desc"}],
-    filterByFormula: `IF({Owner Slack User ID}!='', IF({Send Slack Status Reminders}=1, IF(Done=0, TRUE(), FALSE()), FALSE()), FALSE())`
+    filterByFormula: `IF({Owner Slack User ID}!='', IF({Send Slack Status Reminders}=1, IF(Done=0, IF({Latest Status}!='Backlog', TRUE(), FALSE()), FALSE()), FALSE()), FALSE())`
   })
   
   // group projects by their owner
@@ -71,7 +71,7 @@ async function sendStatusUpdateReminders() {
     }
     slack.sendPrivateMessage({
       channel: owner,
-      text: 'Here are some projects that need updates',
+      text: ':wave: Here are some active projects that need updates',
       attachments: attachments
     })
     console.log(attachments)
