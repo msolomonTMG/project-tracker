@@ -44,8 +44,10 @@ app.post('/interactivity', async function(req, res) {
     case 'dialog_submission':
       // we currently only have project status dialogs
       // but in the future we may want to check what to do here
+      console.log('DIALOG SUB')
+      console.log(payload)
       if (!payload.submission.project) {
-        // there is a type of dialog that does not rewuqire the user to enter
+        // there is a type of dialog that does not require the user to enter
         // the project so we do it for them in the callback_id field
         payload.submission.project = payload.callback_id
       }

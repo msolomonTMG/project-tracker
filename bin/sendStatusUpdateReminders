@@ -2,6 +2,7 @@
 
 const slack = require('../slack')
 const airtable = require('../airtable')
+const utils = require('../utils')
 
 // const dayOfWeek = new Date().getDay();
 // const isWeekend = (dayOfWeek == 6) || (dayOfWeek == 0); // 6 = Saturday, 0 = Sunday
@@ -39,6 +40,7 @@ async function sendStatusUpdateReminders() {
     for (const project of projects) {
       attachments.push({
         title: project.get('Name'),
+        color: utils.getStatusColor(project.get('Latest Status') ? project.get('Latest Status')[0] : ''),
         fields: [
           {
             title: 'Latest Status',

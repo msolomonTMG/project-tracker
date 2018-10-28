@@ -1,32 +1,8 @@
 const request = require('request')
 const moment = require('moment')
+const utils = require('../utils')
 
 const helpers = {
-  getStatusColor (status) {
-    switch(status) {
-      case 'Planning':
-        return '#1DD9D2'
-        break;
-      case 'Green':
-        return '#21C932'
-        break;
-      case 'Yellow':
-        return '#FCB400'
-        break;
-      case 'Red':
-        return '#F82C60'
-        break;
-      case 'Blocked Internal':
-        return '#2C7FF9'
-        break;
-      case 'Blocked External':
-        return '#8B46FF'
-        break;
-      default:
-        return '#D5D5D5'
-        break;
-    }
-  },
   openDialog (dialog, triggerId) {
     console.log('dialog helper')
     return new Promise((resolve, reject) => {
@@ -79,6 +55,36 @@ const helpers = {
 }
 
 module.exports = {
+  updateMessage (messageOptions) {
+    return new Promise((resolve, reject) => {
+      let postData = {
+        channel: messageOptions.channel,
+        text: messageOptions.text,
+        ts: messageOptions.timestamp
+      }
+      
+      if (messageOptions.attachments) {
+        postData.attachments = messageOptions.attachments
+      }
+      
+      const options = {
+        method: 'post',
+        body: postData,
+        json: true,
+        url: `https://slack.com/api/chat.update`,
+        headers: {
+          'Authorization': `Bearer ${process.env.SLACK_OAUTH_TOKEN}`,
+          'Content-type': 'application/json',
+          'charset': 'UTF-8'
+        }
+      }
+      
+      request(options, (err, response, body) => {
+        if (err) { console.error(err); return reject(err); }
+        return resolve(body)
+      })
+    })
+  },
   sendPrivateMessage (messageOptions) {
     return new Promise((resolve, reject) => {
       let postData = {
@@ -138,14 +144,14 @@ module.exports = {
       })
     })
   },
-  openStatusForSpecificProjectDialog (triggerId, projectId, projectName) {
+  openStatusForSpecificProjectDialog (triggerId, projectId, projectName, state) {
     console.log(`trigger id is ${triggerId}`)
     return new Promise((resolve, reject) => {
       if (projectName.length > 24) {
         // if name > 24 chars,strip to 21 chars and add three dots
         projectName = projectName.substring(0, 21).concat('...')
       }
-      const dialog = {
+      let dialog = {
         callback_id: projectId,
         title: `${projectName}`,
         submit_label: 'Create',
@@ -192,6 +198,10 @@ module.exports = {
             hint: 'What\'s your update?'
           }
         ]
+      }
+      
+      if (state) {
+        dialog.state = state
       }
       helpers.openDialog(dialog, triggerId)
     })
@@ -267,7 +277,7 @@ module.exports = {
       statusUpdates.forEach((statusUpdate, index) => {
         console.log(statusUpdate)
         attachments.push({
-          color: helpers.getStatusColor(statusUpdate.get('Status')),
+          color: utils.getStatusColor(statusUpdate.get('Status')),
           title: statusUpdate.get('Project Name') ? statusUpdate.get('Project Name')[0] : '',
           title_link: `https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${statusesView}/${statusUpdate.id}`,
           fields: [

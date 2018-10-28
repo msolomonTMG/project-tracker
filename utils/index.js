@@ -1,5 +1,30 @@
 
 module.exports = {
+  getStatusColor (status) {
+    switch(status) {
+      case 'Planning':
+        return '#1DD9D2'
+        break;
+      case 'Green':
+        return '#21C932'
+        break;
+      case 'Yellow':
+        return '#FCB400'
+        break;
+      case 'Red':
+        return '#F82C60'
+        break;
+      case 'Blocked Internal':
+        return '#2C7FF9'
+        break;
+      case 'Blocked External':
+        return '#8B46FF'
+        break;
+      default:
+        return '#D5D5D5'
+        break;
+    }
+  },
   formatProjectDialogOptions (optionGroups, project) {
     return new Promise((resolve, reject) => {
       const projectTeamNameLookUp = project.get('Team Name Lookup')
