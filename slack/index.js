@@ -3,6 +3,17 @@ const moment = require('moment')
 const utils = require('../utils')
 
 const helpers = {
+  getStatusOptions () {
+    const statuses = ['Green', 'Yellow', 'Red', 'Planning', 'Blocked Internal', 'Blocked External', 'Backlog']
+    let statusOptions = []
+    for (status of statuses) {
+      statusOptions.push({
+        label: status,
+        value: status
+      })
+    }
+    return statusOptions
+  },
   openDialog (dialog, triggerId) {
     console.log('dialog helper')
     return new Promise((resolve, reject) => {
@@ -160,36 +171,7 @@ module.exports = {
             label: 'Status',
             name: 'status',
             type: 'select',
-            options: [
-              {
-                label: 'Green',
-                value: 'Green'
-              },
-              {
-                label: 'Yellow',
-                value: 'Yellow'
-              },
-              {
-                label: 'Red',
-                value: 'Red'
-              },
-              {
-                label: 'Planning',
-                value: 'Planning'
-              },
-              {
-                label: 'Blocked Internal',
-                value: 'Blocked Internal'
-              },
-              {
-                label: 'Blocked External',
-                value: 'Blocked External'
-              },
-              {
-                label: 'Backlog',
-                value: 'Backlog'
-              }
-            ]
+            options: helpers.getStatusOptions()
           },
           {
             type: 'textarea',
@@ -225,36 +207,7 @@ module.exports = {
             label: 'Status',
             name: 'status',
             type: 'select',
-            options: [
-              {
-                label: 'Green',
-                value: 'Green'
-              },
-              {
-                label: 'Yellow',
-                value: 'Yellow'
-              },
-              {
-                label: 'Red',
-                value: 'Red'
-              },
-              {
-                label: 'Planning',
-                value: 'Planning'
-              },
-              {
-                label: 'Blocked Internal',
-                value: 'Blocked Internal'
-              },
-              {
-                label: 'Blocked External',
-                value: 'Blocked External'
-              },
-              {
-                label: 'Backlog',
-                value: 'Backlog'
-              }
-            ]
+            options: helpers.getStatusOptions()
           },
           {
             type: 'textarea',
