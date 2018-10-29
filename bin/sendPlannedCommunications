@@ -3,12 +3,13 @@
 const slack = require('../slack')
 const airtable = require('../airtable')
 
-// const dayOfWeek = new Date().getDay();
-// const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
-// 
-// if (isMonday) {
-//   return false // do not run this on the weekends
-// }
+const dayOfWeek = new Date().getDay();
+const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
+
+if (!isMonday) {
+  return false // only run on Mondays
+}
+
 sendPlannedCommunications()
 
 // get all tasks that are either planned for this week
