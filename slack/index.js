@@ -96,6 +96,17 @@ module.exports = {
       })
     })
   },
+  sendWebhook (messageOptions) {
+    return new Promise((resolve, reject) => {
+      helpers.sendSlackMessage(messageOptions.webhook, messageOptions.text, messageOptions.attachments)
+        .then(success => {
+          return resolve(success)
+        })
+        .catch(err => {
+          return reject(err)
+        })
+    })
+  },
   sendPrivateMessage (messageOptions) {
     return new Promise((resolve, reject) => {
       let postData = {
