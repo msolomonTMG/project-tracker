@@ -32,9 +32,25 @@ app.post('/interactivity', async function(req, res) {
   console.log(req.body)
   const payload = JSON.parse(req.body.payload)
   switch(payload.type) {
+    case 'interactive_message':
+      if (payload.actions[0].value == 'create_status') {
+        let projectName = payload.actions[0].name
+        slack.openStatusForSpecificProjectDialog(payload.trigger_id, payload.callback_id, projectName)
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
+      }
+      break;
     case 'dialog_submission':
       // we currently only have project status dialogs
       // but in the future we may want to check what to do here
+      console.log('DIALOG SUB')
+      console.log(payload)
+      if (!payload.submission.project) {
+        // there is a type of dialog that does not require the user to enter
+        // the project so we do it for them in the callback_id field
+        payload.submission.project = payload.callback_id
+      }
       const newStatus = await airtable.createStatusUpdateFromDialog(payload.submission)
       console.log(newStatus)
       slack.sendEphemeralMessage({
@@ -59,13 +75,15 @@ app.post('/interactivity', async function(req, res) {
           }
         ]
       })
+      res.setHeader('Content-Type', 'application/json')
+      //stupid slack needs an empty body
+      res.status(200).send({})
       break;
+    default:
+      res.setHeader('Content-Type', 'application/json')
+      //stupid slack needs an empty body
+      res.status(200).send({})
   }
-  
-  // do something here before returning empty body
-  res.setHeader('Content-Type', 'application/json')
-  //stupid slack needs an empty body
-  res.status(200).send({})
 })
 
 //used to get dialog select options

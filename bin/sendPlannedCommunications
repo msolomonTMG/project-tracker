@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+const slack = require('../slack')
+const airtable = require('../airtable')
+
+const dayOfWeek = new Date().getDay();
+const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
+
+if (!isMonday) {
+  return false // only run on Mondays
+}
+
+sendPlannedCommunications()
+
+// get all tasks that are either planned for this week
+// or have a due date for this week
+// and have a type = communication
+async function sendPlannedCommunications() {
+  const communications = await airtable.getRecordsFromView('Tasks', {
+    view: 'All Tasks',
+    sort: [{field: "Project", direction: "desc"}],
+    filterByFormula:`IF(Weeknum(Today())=Weeknum({Due Date}), IF({Type}='Communication', TRUE(), FALSE()),IF({Is PLanned For This Week}=1,IF({Type}='Communication',TRUE(),FALSE()),FALSE()),FALSE())`    
+  })
+  
+  let attachments = []
+  const tasksTable = 'tblPl0E3aiD0kD2MR'
+  const tasksView = 'viwmnpxGQMDlUNOZ6'
+  for (const communication of communications) {
+    let attachment = {
+      title: communication.get('Name'),
+      title_link: `https://airtable.com/${tasksTable}/${tasksView}/${communication.id}`,
+      fields: [
+        {
+          title: 'Project',
+          value: communication.get('Project Name Rollup'),
+          short: true
+        },
+        {
+          title: 'Phase',
+          value: communication.get('Phase Name Look Up')[0],
+          short: true
+        },
+        {
+          title: 'Due Date',
+          value: communication.get('Due Date'),
+          short: true
+        },
+        {
+          title: 'Assignee',
+          value: communication.get('Assignee Name Lookup')[0],
+          short: true
+        }
+      ],
+      footer: communication.get('Team Name Lookup')[0],
+      footer_icon: communication.get('Team Logo Lookup')[0]
+    }
+    attachments.push(attachment)
+  }
+    
+  slack.sendWebhook({
+    text: ':wave: Here is the weekly report of upcoming communications!',
+    attachments: attachments,
+    webhook: process.env.PLANNED_COMMS_URL
+  })
+}
