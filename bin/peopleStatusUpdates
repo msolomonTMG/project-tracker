@@ -2,6 +2,8 @@
 
 const slack = require('../slack')
 const airtable = require('../airtable')
+const utils = require('../utils')
+const moment = require('moment')
 
 // const dayOfWeek = new Date().getDay();
 // const isWeekend = (dayOfWeek == 6) || (dayOfWeek == 0); // 6 = Saturday, 0 = Sunday
@@ -9,12 +11,61 @@ const airtable = require('../airtable')
 // if (isWeekend) {
 //   return false // do not run this on the weekends
 // }
-console.log('here we go')
-airtable.getRecordsFromView('Status Updates', {
-  view: 'This Week\'s Status Report',
-  sort: [{field: "Team Name", direction: "desc"}]
-})
-  .then(statusUpdates => {
-    console.log(statusUpdates)
-    slack.sendPeopleStatusReport(statusUpdates)
+
+sendPeopleStatusReport()
+
+async function sendPeopleStatusReport() {
+  console.log('here we go')
+  const statusUpdates = await airtable.getRecordsFromView('Status Updates', {
+    view: 'This Week\'s Status Report',
+    sort: [{field: "Team Name", direction: "desc"}]
   })
+  
+  let attachments = []
+  const statusesTable = 'tblOx97EkQptZq5ts'
+  const statusesView = 'viwRGjGfoLTHUYjBc'
+  for (const statusUpdate of statusUpdates) {
+    let attachment = {
+      title: statusUpdate.get('Project Name') ? statusUpdate.get('Project Name')[0] : '',
+      title_link: `https://airtable.com/${statusesTable}/${statusesView}/${statusUpdate.id}`,
+      color: utils.getStatusColor(statusUpdate.get('Status')),
+      fields: [
+        {
+          title: 'Target End Date',
+          value: statusUpdate.get('Project Target End') ? statusUpdate.get('Project Target End')[0] : '',
+          short: true
+        },
+        {
+          title: 'Progress',
+          value: statusUpdate.get('Project Progress') ? `${Math.round(statusUpdate.get('Project Progress')[0])}%` : '',
+          short: true
+        },
+        {
+          title: 'Owner',
+          value: statusUpdate.get('Project Owner Name') ? statusUpdate.get('Project Owner Name')[0] : '',
+          short: true
+        },
+        {
+          title: 'Status',
+          value: statusUpdate.get('Status'),
+          short: true
+        },
+        {
+          title: 'Description',
+          value: statusUpdate.get('Description'),
+          short: false
+        }
+      ],
+      footer: 'Last Updated',
+      ts: moment(statusUpdate.get('Created')).unix()
+    }
+    
+    attachments.push(attachment)
+  }
+  
+  slack.sendWebhook({
+    text: ':wave: Here is the People Team status report!',
+    attachments: attachments,
+    webhook: process.env.PEOPLE_STATUS_UPDATES_SLACK_CHANNEL
+  })
+}
