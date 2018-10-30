@@ -18,7 +18,16 @@ async function sendPeopleStatusReport() {
   console.log('here we go')
   const statusUpdates = await airtable.getRecordsFromView('Status Updates', {
     view: 'This Week\'s Status Report',
-    sort: [{field: "Team Name", direction: "desc"}]
+    sort: [
+      {
+        field: 'Team Name',
+        direction: 'desc'
+      },
+      {
+        field: 'Status',
+        direction: 'desc'
+      }
+    ]
   })
   
   let attachments = []
