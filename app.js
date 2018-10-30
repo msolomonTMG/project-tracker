@@ -19,8 +19,26 @@ app.post('/project-status', async function(req, res) {
   if (req.body.challenge) {
     return res.send(req.body.challenge)
   }
+  const payload = req.body
+  // make sure that whatever user triggered this slash command
+  // is a user that we recognize from airtable
+  const airtableUser = await airtable.getRecordsFromView('People', {
+    view: 'All People',
+    filterByFormula: `FIND(UPPER("${payload.user_id}"), UPPER({Slack User ID}), 0)`,
+    maxRecords: 1
+  })
+  if (!airtableUser.length) {
+    // we didn't find the slack user id in airtable so send error message
+    slack.sendEphemeralMessage({
+      userId: payload.user_id,
+      channel: payload.channel_id,
+      text: ':hand: hold up a sec. your Slack User ID can’t be found in this Airtable. Reach out to People Operations if you require assistance.'
+    })
+  } else {
+    // we found the slack user id in airtable so pop the dialog 
+    slack.openStatusDialog(req.body.trigger_id)
+  }
   
-  slack.openStatusDialog(req.body.trigger_id)
   // slack will post OK in the channel if you just return 200
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send()
