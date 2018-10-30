@@ -114,17 +114,20 @@ app.post('/dialog-options-load', async function(req, res) {
   // we can tell what dialog field we're populating by the name
   switch(payload.name) {
     case 'project':
-      let projects = await airtable.getRecordsFromView('Projects', {
+      let projectRetrievalOptions = {
         view: 'All Projects',
         sort: [{field: "Name", direction: "asc"}],
-        filterByFormula: `FIND(LOWER("${payload.value}"), LOWER(Name), 0)`,
         maxRecords: 100
-      })
+      }
+      if (payload.value) {
+        projectRetrievalOptions.filterByFormula = `FIND(LOWER("${payload.value}"), LOWER(Name), 0)`
+      }
+      let projects = await airtable.getRecordsFromView('Projects', projectRetrievalOptions)
+      
       let optionGroups = []
       for (const project of projects) {
         optionGroups = await utils.formatProjectDialogOptions(optionGroups, project)
       }
-    
       res.status(200).send({
         option_groups: optionGroups
       })
