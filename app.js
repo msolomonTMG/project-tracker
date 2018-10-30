@@ -128,8 +128,6 @@ app.post('/dialog-options-load', async function(req, res) {
       for (const project of projects) {
         optionGroups = await utils.formatProjectDialogOptions(optionGroups, project)
       }
-      console.log('gonna send these:')
-      console.log(optionGroups)
       res.status(200).send({
         option_groups: optionGroups
       })
