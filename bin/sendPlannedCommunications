@@ -37,7 +37,7 @@ async function sendPlannedCommunications() {
         },
         {
           title: 'Phase',
-          value: communication.get('Phase Name Look Up')[0],
+          value: communication.get('Phase Name Look Up') ? communication.get('Phase Name Look Up')[0] : '',
           short: true
         },
         {
@@ -47,12 +47,12 @@ async function sendPlannedCommunications() {
         },
         {
           title: 'Assignee',
-          value: communication.get('Assignee Name Lookup')[0],
+          value: communication.get('Assignee Name Lookup') ? communication.get('Assignee Name Lookup')[0] : '',
           short: true
         }
       ],
-      footer: communication.get('Team Name Lookup')[0],
-      footer_icon: communication.get('Team Logo Lookup')[0]
+      footer: communication.get('Team Name Lookup') ? communication.get('Team Name Lookup')[0] : '',
+      footer_icon: communication.get('Team Logo Lookup')[0] ? communication.get('Team Logo Lookup')[0] : ''
     }
     attachments.push(attachment)
   }
