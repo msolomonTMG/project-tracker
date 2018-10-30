@@ -52,7 +52,7 @@ async function sendPlannedCommunications() {
         }
       ],
       footer: communication.get('Team Name Lookup') ? communication.get('Team Name Lookup')[0] : '',
-      footer_icon: communication.get('Team Logo Lookup')[0] ? communication.get('Team Logo Lookup')[0] : ''
+      footer_icon: communication.get('Team Logo Lookup') ? communication.get('Team Logo Lookup')[0] : ''
     }
     attachments.push(attachment)
   }
