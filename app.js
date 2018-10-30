@@ -36,7 +36,7 @@ app.post('/project-status', async function(req, res) {
     })
   } else {
     // we found the slack user id in airtable so pop the dialog 
-    slack.openStatusDialog(req.body.trigger_id)
+    slack.openStatusDialog(payload.trigger_id)
   }
   
   // slack will post OK in the channel if you just return 200
