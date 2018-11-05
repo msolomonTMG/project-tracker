@@ -5,12 +5,12 @@ const airtable = require('../airtable')
 const utils = require('../utils')
 const moment = require('moment')
 
-// const dayOfWeek = new Date().getDay();
-// const isWeekend = (dayOfWeek == 6) || (dayOfWeek == 0); // 6 = Saturday, 0 = Sunday
-// 
-// if (isWeekend) {
-//   return false // do not run this on the weekends
-// }
+const dayOfWeek = new Date().getDay();
+const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
+
+if (!isMonday) {
+  return false // only run on Mondays
+}
 
 sendPeopleStatusReport()
 
