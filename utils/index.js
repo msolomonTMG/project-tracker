@@ -27,7 +27,7 @@ module.exports = {
   },
   formatProjectDialogOptions (optionGroups, project) {
     return new Promise((resolve, reject) => {
-      const projectTeamNameLookUp = project.get('Team')
+      const projectTeamNameLookUp = project.get('Team Name Lookup')
       let projectTeamName = 'No Team Defined'
       if (projectTeamNameLookUp) {
         projectTeamName = projectTeamNameLookUp[0]
