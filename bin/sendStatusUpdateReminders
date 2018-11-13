@@ -5,10 +5,10 @@ const airtable = require('../airtable')
 const utils = require('../utils')
 
 const dayOfWeek = new Date().getDay();
-const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
+const isFriday = dayOfWeek == 5; // 6 = Saturday, 0 = Sunday
 
-if (!isMonday) {
-  return false // only run on Mondays
+if (!isFriday) {
+  return false // only run on Fridays
 }
 sendStatusUpdateReminders()
 
