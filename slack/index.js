@@ -43,27 +43,6 @@ const helpers = {
 }
 
 module.exports = {
-  sendTaskManagementButton (messageOptions) {
-    return new Promise((resolve, reject) => {
-      let postData = {
-        channel: messageOptions.channel,
-        text: messageOptions.text,
-        ts: messageOptions.timestamp,
-        attachments: [
-          {
-            actions: [
-              {
-                name: 'Task Management Button',
-                text: 'Manage Tasks',
-                type: 'button',
-                value: 'send_current_tasks'
-              }
-            ]
-          }
-        ]
-      }
-    })
-  },
   updateMessage (messageOptions) {
     return new Promise((resolve, reject) => {
       let postData = {
