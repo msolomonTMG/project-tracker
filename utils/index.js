@@ -1,11 +1,13 @@
 
 module.exports = {
+  // status could represent a task status or a project status
   getStatusColor (status) {
     switch(status) {
       case 'Planning':
         return '#1DD9D2'
         break;
       case 'Green':
+      case 'Done':
         return '#21C932'
         break;
       case 'Yellow':
@@ -19,6 +21,12 @@ module.exports = {
         break;
       case 'Blocked External':
         return '#8B46FF'
+        break;
+      case 'In Progress':
+        return '#2d7ff9'
+        break;
+      case 'Blocked':
+        return '#f99de2'
         break;
       default:
         return '#D5D5D5'

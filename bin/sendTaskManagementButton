@@ -23,13 +23,13 @@ async function sendTaskManagementButton() {
         attachments: [
           {
             title: ':wave: Manage your tasks here!',
-            callback_id: 'U375R09CY',
+            callback_id: `${person.get('Name')}`,
             actions: [
               {
-                name: 'manage tasks',
+                name: 'manage_tasks',
                 text: 'Manage Tasks',
                 type: 'button',
-                value: `${person.id}`
+                value: `${person.get('Slack User ID')}`
               }
             ]
           }

@@ -57,6 +57,67 @@ app.post('/interactivity', async function(req, res) {
         // slack will post OK in the channel if you just return 200
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
+      } else if (payload.actions[0].name == 'manage_tasks') {
+        // get tasks assigned to this person and planned for this week
+        const tasksAssignedToPerson = await airtable.getRecordsFromView('Tasks', {
+          view: 'All Tasks',
+          filterByFormula: `IF(Assignee='${payload.callback_id}', IF({Is Planned For This Week}=1, TRUE(), FALSE()), FALSE())`
+        })
+        
+        let attachments = []
+        
+        for (const task of tasksAssignedToPerson) {
+          attachments.push({
+            callback_id: `${task.id}`,
+            attachment_type: 'default',
+            title: `${task.get('Name')}`,
+            color: utils.getStatusColor(`${task.get('Status')}`),
+            fields: [
+              {
+                title: 'Project',
+                value: `${task.get('Project Name Rollup')}`,
+                short: true
+              },
+              {
+                title: 'Status',
+                value: `${task.get('Status')}`
+              }
+            ],
+            actions: [
+              {
+                name: 'task_status_selector',
+                text: 'Update status to...',
+                type: 'select',
+                options: [
+                  {
+                    text: 'To Do',
+                    value: ''
+                  },
+                  {
+                    text: 'In Progress',
+                    value: 'In Progress'
+                  },
+                  {
+                    text: 'Blocked',
+                    value: 'Blocked'
+                  },
+                  {
+                    text: 'Done',
+                    value: 'Done'
+                  }
+                ]
+              }
+            ]
+          })
+        }
+        slack.sendPrivateMessage({
+          channel: payload.actions[0].value,
+          text: 'Here are the planned tasks assigned to you:',
+          attachments: attachments
+        })
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
       }
       break;
     case 'dialog_submission':
