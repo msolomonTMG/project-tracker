@@ -123,7 +123,7 @@ app.post('/interactivity', async function(req, res) {
         // slack doesnt allow for null values so we use To Do as a placeholder
         // and then we set the newStatus to be blank here
         if (newStatus == 'To Do') {
-          newStatus == ''
+          newStatus = ''
         }
         const taskId = payload.callback_id
         airtable.updateRecord('Tasks', taskId, {
