@@ -80,7 +80,7 @@ app.post('/interactivity', async function(req, res) {
               },
               {
                 title: 'Status',
-                value: `${task.get('Status')}`
+                value: `${task.get('Status')} ? ${task.get('Status')} : 'To Do'`
               }
             ],
             actions: [
@@ -91,7 +91,7 @@ app.post('/interactivity', async function(req, res) {
                 options: [
                   {
                     text: 'To Do',
-                    value: ''
+                    value: 'To Do'
                   },
                   {
                     text: 'In Progress',
