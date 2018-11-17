@@ -80,7 +80,7 @@ app.post('/interactivity', async function(req, res) {
               },
               {
                 title: 'Status',
-                value: task.get('Status')} ? task.get('Status')} : 'To Do'
+                value: task.get('Status') ? task.get('Status') : 'To Do'
               }
             ],
             actions: [
@@ -116,6 +116,15 @@ app.post('/interactivity', async function(req, res) {
           attachments: attachments
         })
         // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
+      } else if (payload.actions[0].name == 'task_status_selector') {
+        const newStatus = payload.actions[0].selected_options[0].value
+        const taskId = payload.callback_id
+        airtable.updateRecord('Tasks', taskId, {
+          'Status': newStatus
+        })
+        
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
       }

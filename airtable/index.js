@@ -20,6 +20,14 @@ module.exports = {
       
     })
   },
+  updateRecord (tableName, recordId, updateOptions) {
+    return new Promise((resolve, reject) => {
+      base(tableName).update(recordId, updateOptions, (err, record) => {
+        if (err) { console.error(err); return reject(err); }
+        return resolve(record)
+      })
+    })
+  },
   createStatusUpdateFromDialog (dialogSubmission) {
     return new Promise((resolve, reject) => {
       base('Status Updates').create({
