@@ -80,7 +80,7 @@ app.post('/interactivity', async function(req, res) {
               },
               {
                 title: 'Status',
-                value: `${task.get('Status')} ? ${task.get('Status')} : 'To Do'`
+                value: task.get('Status')} ? task.get('Status')} : 'To Do'
               }
             ],
             actions: [
