@@ -119,7 +119,12 @@ app.post('/interactivity', async function(req, res) {
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
       } else if (payload.actions[0].name == 'task_status_selector') {
-        const newStatus = payload.actions[0].selected_options[0].value
+        let newStatus = payload.actions[0].selected_options[0].value
+        // slack doesnt allow for null values so we use To Do as a placeholder
+        // and then we set the newStatus to be blank here
+        if (newStatus == 'To Do') {
+          newStatus == ''
+        }
         const taskId = payload.callback_id
         airtable.updateRecord('Tasks', taskId, {
           'Status': newStatus
