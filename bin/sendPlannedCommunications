@@ -36,8 +36,8 @@ async function sendPlannedCommunications() {
           short: true
         },
         {
-          title: 'Phase',
-          value: communication.get('Phase Name Look Up') ? communication.get('Phase Name Look Up')[0] : '',
+          title: 'Type',
+          value: communication.get('Type'),
           short: true
         },
         {
