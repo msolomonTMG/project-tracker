@@ -12,54 +12,114 @@ if (!isMonday) {
 
 sendPlannedCommunications()
 
-// get all tasks that are either planned for this week
-// or have a due date for this week
-// and have a type = communication
 async function sendPlannedCommunications() {
-  const communications = await airtable.getRecordsFromView('Tasks', {
+  // get all tasks that are either planned for this week
+  // or have a due date for this week
+  // and have a type = communication or team leads communication
+  const thisWeekCommunications = await airtable.getRecordsFromView('Tasks', {
     view: 'All Tasks',
     sort: [{field: "Project", direction: "desc"}],
-    filterByFormula:`IF(Weeknum(Today())=Weeknum({Due Date}), IF({Type}='Communication', TRUE(), FALSE()),IF({Is PLanned For This Week}=1,IF({Type}='Communication',TRUE(),FALSE()),FALSE()),FALSE())`    
+    filterByFormula:`IF(ISERROR(IF(WEEKNUM(TODAY())=WEEKNUM({Due Date}))=1),IF({Is Planned For This Week}=1,IF({Type}='Communication',TRUE(),IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()),IF(WEEKNUM(TODAY())=WEEKNUM({Due Date}),IF({Type}='Communication', TRUE(), IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()))`    
   })
-  
-  let attachments = []
-  const tasksTable = 'tblPl0E3aiD0kD2MR'
-  const tasksView = 'viwmnpxGQMDlUNOZ6'
-  for (const communication of communications) {
-    let attachment = {
-      title: communication.get('Name'),
-      title_link: `https://airtable.com/${tasksTable}/${tasksView}/${communication.id}`,
-      fields: [
-        {
-          title: 'Project',
-          value: communication.get('Project Name Rollup'),
-          short: true
-        },
-        {
-          title: 'Type',
-          value: communication.get('Type'),
-          short: true
-        },
-        {
-          title: 'Due Date',
-          value: communication.get('Due Date'),
-          short: true
-        },
-        {
-          title: 'Assignee',
-          value: communication.get('Assignee Name Lookup') ? communication.get('Assignee Name Lookup')[0] : '',
-          short: true
-        }
-      ],
-      footer: communication.get('Team') ? communication.get('Team') : '',
-      footer_icon: communication.get('Team Logo Lookup') ? communication.get('Team Logo Lookup')[0] : ''
-    }
-    attachments.push(attachment)
-  }
+  if (thisWeekCommunications.length > 0) {
+    const thisWeekCommunicationsAttachments = await helpers.formatSlackAttachments(thisWeekCommunications)
     
-  slack.sendWebhook({
-    text: ':wave: Here is the weekly report of upcoming communications!',
-    attachments: attachments,
-    webhook: process.env.PLANNED_COMMS_URL
+    slack.sendWebhook({
+      text: '*:wave: Here is the report of this week\'s upcoming communications!*',
+      attachments: thisWeekCommunicationsAttachments,
+      webhook: process.env.PLANNED_COMMS_URL
+    })
+  }
+  console.log('THIS WEEK')
+  for (const comm of thisWeekCommunications) {
+    console.log(comm.get('Name'))
+  }
+  // get all tasks that are either planned for next week
+  // or have a due date for next week
+  // and have a type = communication or team leads communication
+  const nextWeekCommunications = await airtable.getRecordsFromView('Tasks', {
+    view: 'All Tasks',
+    sort: [{field: "Project", direction: "desc"}],
+    filterByFormula:`IF(ISERROR(IF(WEEKNUM({Due Date}) - WEEKNUM(TODAY()) = 1)) = 1,IF({Is Planned For Next Week}=1,IF({Type}='Communication',TRUE(),IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()),IF(WEEKNUM({Due Date}) - WEEKNUM(TODAY()) = 1,IF({Type}='Communication',TRUE(),IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()))`    
   })
+  if (nextWeekCommunications.length > 0) {
+    const nextWeekCommunicationsAttachments = await helpers.formatSlackAttachments(nextWeekCommunications)
+    
+    slack.sendWebhook({
+      text: '*:eyes: Looking ahead, here are comms planned for next week:*',
+      attachments: nextWeekCommunicationsAttachments,
+      webhook: process.env.PLANNED_COMMS_URL
+    })
+  }
+  console.log('NEXT WEEK')
+  for (const comm of nextWeekCommunications) {
+    console.log(comm.get('Name'))
+  }
+  // get all tasks that are planned for a week in the past
+  // or have a due date for last week
+  // and have a type = communication or team leads communication
+  // and do not have a status set to Done
+  const overdueCommunications = await airtable.getRecordsFromView('Tasks', {
+    view: 'All Tasks',
+    sort: [{field: "Project", direction: "desc"}],
+    filterByFormula:`IF(ISERROR(IF(WEEKNUM({Due Date}) - WEEKNUM(TODAY()) < 0)) = 1,IF({Is Planned For Week In The Past} = 1,IF({Status} != 'Done',IF({Type}='Communication', TRUE(), IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()),FALSE()),IF(WEEKNUM({Due Date}) - WEEKNUM(TODAY()) < 0,IF({Status} != 'Done',IF({Type}='Communication', TRUE(), IF({Type}='Team Leads Communication',TRUE(),FALSE())),FALSE()),FALSE()))`    
+  })
+  if (overdueCommunications.length > 0) {
+    const overdueCommunicationsAttachments = await helpers.formatSlackAttachments(overdueCommunications)
+    
+    slack.sendWebhook({
+      text: '*:warning: These comms were planned to go out in the past but are not marked as Done:*',
+      attachments: overdueCommunicationsAttachments,
+      webhook: process.env.PLANNED_COMMS_URL
+    })
+  }
+  console.log('OVERDUE')
+  for (const comm of overdueCommunications) {
+    console.log(comm.get('Name'))
+  }
+}
+
+const helpers = {
+  formatSlackAttachments (communications) {
+    return new Promise((resolve, reject) => {
+      
+      let attachments = []
+      const tasksTable = 'tblPl0E3aiD0kD2MR'
+      const tasksView = 'viwmnpxGQMDlUNOZ6'
+      for (const communication of communications) {
+        let attachment = {
+          title: communication.get('Name'),
+          title_link: `https://airtable.com/${tasksTable}/${tasksView}/${communication.id}`,
+          fields: [
+            {
+              title: 'Project',
+              value: communication.get('Project Name Rollup'),
+              short: true
+            },
+            {
+              title: 'Type',
+              value: communication.get('Type'),
+              short: true
+            },
+            {
+              title: 'Due Date',
+              value: communication.get('Due Date'),
+              short: true
+            },
+            {
+              title: 'Assignee',
+              value: communication.get('Assignee Name Lookup') ? communication.get('Assignee Name Lookup')[0] : '',
+              short: true
+            }
+          ],
+          footer: communication.get('Team') ? communication.get('Team') : '',
+          footer_icon: communication.get('Team Logo Lookup') ? communication.get('Team Logo Lookup')[0] : ''
+        }
+        attachments.push(attachment)
+      }
+      
+      return resolve(attachments)
+      
+    })
+  }
 }
