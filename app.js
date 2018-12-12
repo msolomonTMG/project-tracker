@@ -147,6 +147,9 @@ app.post('/interactivity', async function(req, res) {
           attachments: updatedMessageAttachments,
           timestamp: payload.original_message.ts
         })
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
       } else if (payload.actions[0].name == 'move_task_to_this_week') {
         // get the record for the this week
         const thisWeekRecords = await airtable.getRecordsFromView('Weeks', {
@@ -171,6 +174,9 @@ app.post('/interactivity', async function(req, res) {
           attachments: updatedMessageAttachments,
           timestamp: payload.original_message.ts
         })
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
       } else if (payload.actions[0].name == 'task_status_selector') {
         let newStatus = payload.actions[0].selected_options[0].value
         // slack doesnt allow for null values so we use To Do as a placeholder
