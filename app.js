@@ -61,13 +61,12 @@ app.post('/interactivity', async function(req, res) {
         // get tasks assigned to this person and planned for this week
         const tasksAssignedToPerson = await airtable.getRecordsFromView('Tasks', {
           view: 'All Tasks',
-          filterByFormula: `IF(Assignee='${payload.callback_id}', IF({Is Planned For This Week}=1, TRUE(), FALSE()), FALSE())`
+          filterByFormula: `IF(Assignee='${payload.callback_id}', IF({Is Planned For This Week}=1, TRUE(), FALSE()), FALSE())`,
+          sort: [{field: 'Status', direction: 'asc'}]
         })
         
-        let attachments = []
-        
         for (const task of tasksAssignedToPerson) {
-          attachments.push({
+          const attachments = [{
             callback_id: `${task.id}`,
             attachment_type: 'default',
             title: `${task.get('Name')}`,
@@ -108,13 +107,13 @@ app.post('/interactivity', async function(req, res) {
                 ]
               }
             ]
+          }]
+          slack.sendPrivateMessage({
+            channel: payload.actions[0].value,
+            text: '',
+            attachments: attachments
           })
         }
-        slack.sendPrivateMessage({
-          channel: payload.actions[0].value,
-          text: 'Here are the planned tasks assigned to you:',
-          attachments: attachments
-        })
         // slack will post OK in the channel if you just return 200
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
@@ -123,7 +122,7 @@ app.post('/interactivity', async function(req, res) {
         // slack doesnt allow for null values so we use To Do as a placeholder
         // and then we set the newStatus to be blank here
         if (newStatus == 'To Do') {
-          newStatus = ''
+          newStatus = null
         }
         const taskId = payload.callback_id
         airtable.updateRecord('Tasks', taskId, {
