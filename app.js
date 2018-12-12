@@ -105,6 +105,12 @@ app.post('/interactivity', async function(req, res) {
                     value: 'Done'
                   }
                 ]
+              },
+              {
+                name: 'move_task_to_next_week',
+                text: 'Move to Next Week',
+                type: 'button',
+                value: `${task.id}`
               }
             ]
           }]
@@ -117,6 +123,30 @@ app.post('/interactivity', async function(req, res) {
         // slack will post OK in the channel if you just return 200
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
+      } else if (payload.actions[0].name == 'move_task_to_next_week') {
+        // get the record for the next week
+        const nextWeekRecords = await airtable.getRecordsFromView('Weeks', {
+          view: 'All Weeks',
+          filterByFormula: 'IF({Is Next Week}, TRUE(), FALSE())',
+          maxRecords: 1
+        })
+        // update the task to be part of the next week
+        const updatedRecord = await airtable.updateRecord('Tasks', payload.actions[0].value, {
+          'Week': [nextWeekRecords[0].id]
+        })
+        // copy the actions of the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // get the index of the Move to Next Week button
+        const buttonIndex = updatedMessageAttachments[0].actions.findIndex((action => action.name === 'move_task_to_next_week'))
+        // update the button to become a Move Back to This Week button
+        updatedMessageAttachments[0].actions[buttonIndex].name = 'move_task_to_this_week'
+        updatedMessageAttachments[0].actions[buttonIndex].text = 'Move Back to This Week'
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
+        })
       } else if (payload.actions[0].name == 'task_status_selector') {
         let newStatus = payload.actions[0].selected_options[0].value
         // slack doesnt allow for null values so we use To Do as a placeholder
@@ -125,6 +155,7 @@ app.post('/interactivity', async function(req, res) {
           newStatus = null
         }
         const taskId = payload.callback_id
+        //TODO: use await here for consistency
         airtable.updateRecord('Tasks', taskId, {
           'Status': newStatus
         }).then(updatedRecord => {
