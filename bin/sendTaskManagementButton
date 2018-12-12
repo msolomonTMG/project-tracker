@@ -15,27 +15,22 @@ async function sendTaskManagementButton() {
   })
   
   for (const person of people) {
-    // TODO: remove this IF after testing
-    if (person.get('Slack User ID') == 'U375R09CY') {
-      
-      slack.sendPrivateMessage({
-        channel: person.get('Slack User ID'),
-        attachments: [
-          {
-            title: ':wave: Manage your tasks here!',
-            callback_id: `${person.get('Name')}`,
-            actions: [
-              {
-                name: 'manage_tasks',
-                text: 'Manage Tasks',
-                type: 'button',
-                value: `${person.get('Slack User ID')}`
-              }
-            ]
-          }
-        ]
-      })
-      
-    }
+    slack.sendPrivateMessage({
+      channel: person.get('Slack User ID'),
+      attachments: [
+        {
+          title: ':wave: Manage your tasks here!',
+          callback_id: `${person.get('Name')}`,
+          actions: [
+            {
+              name: 'manage_tasks',
+              text: 'Manage Tasks',
+              type: 'button',
+              value: `${person.get('Slack User ID')}`
+            }
+          ]
+        }
+      ]
+    })
   }
 }
