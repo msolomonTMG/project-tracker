@@ -20,6 +20,7 @@ async function sendTaskManagementButton() {
       attachments: [
         {
           title: ':wave: Manage your tasks here!',
+          text: 'Use the button below to get a head start on next week. Quickly update the statuses of your tasks and easily move tasks to next week if you need more time!',
           callback_id: `${person.get('Name')}`,
           actions: [
             {
