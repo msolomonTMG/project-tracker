@@ -147,6 +147,30 @@ app.post('/interactivity', async function(req, res) {
           attachments: updatedMessageAttachments,
           timestamp: payload.original_message.ts
         })
+      } else if (payload.actions[0].name == 'move_task_to_this_week') {
+        // get the record for the this week
+        const thisWeekRecords = await airtable.getRecordsFromView('Weeks', {
+          view: 'All Weeks',
+          filterByFormula: 'IF({Is This Week}, TRUE(), FALSE())',
+          maxRecords: 1
+        })
+        // update the task to be part of the this week
+        const updatedRecord = await airtable.updateRecord('Tasks', payload.actions[0].value, {
+          'Week': [thisWeekRecords[0].id]
+        })
+        // copy the actions of the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // get the index of the Move to This Week button
+        const buttonIndex = updatedMessageAttachments[0].actions.findIndex((action => action.name === 'move_task_to_this_week'))
+        // update the button to become a Move Back to This Week button
+        updatedMessageAttachments[0].actions[buttonIndex].name = 'move_task_to_next_week'
+        updatedMessageAttachments[0].actions[buttonIndex].text = 'Move to Next Week'
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
+        })
       } else if (payload.actions[0].name == 'task_status_selector') {
         let newStatus = payload.actions[0].selected_options[0].value
         // slack doesnt allow for null values so we use To Do as a placeholder
