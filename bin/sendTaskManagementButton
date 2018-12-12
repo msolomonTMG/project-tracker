@@ -4,6 +4,14 @@ const slack = require('../slack')
 const airtable = require('../airtable')
 const utils = require('../utils')
 
+// uncomment once ready for production
+// const dayOfWeek = new Date().getDay();
+// const isFriday = dayOfWeek == 5; // 6 = Saturday, 0 = Sunday
+// 
+// if (!isFriday) {
+//   return false // only run on Fridays
+// }
+
 sendTaskManagementButton()
 
 async function sendTaskManagementButton() {
