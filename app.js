@@ -156,27 +156,26 @@ app.post('/interactivity', async function(req, res) {
         }
         const taskId = payload.callback_id
         //TODO: use await here for consistency
-        airtable.updateRecord('Tasks', taskId, {
+        const updatedRecord = await airtable.updateRecord('Tasks', taskId, {
           'Status': newStatus
-        }).then(updatedRecord => {
-          // create a new message by copying the original message
-          let updatedMessageAttachments = payload.original_message.attachments
-          // find the index of the Status field in the new message
-          const statusIndex = updatedMessageAttachments[0].fields.findIndex((field => field.title === 'Status'))
-          // update the value of the Status field to match the new status
-          // but if the new status is blank, send To Do
-          if (!newStatus) {
-            newStatus = 'To Do'
-          }
-          updatedMessageAttachments[0].fields[statusIndex].value = newStatus
-          // set new color of the attachment based on new status
-          updatedMessageAttachments[0].color = utils.getStatusColor(newStatus)
-          slack.updateMessage({
-            channel: payload.channel.id,
-            text: payload.original_message.text,
-            attachments: updatedMessageAttachments,
-            timestamp: payload.original_message.ts
-          })
+        })
+        // create a new message by copying the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // find the index of the Status field in the new message
+        const statusIndex = updatedMessageAttachments[0].fields.findIndex((field => field.title === 'Status'))
+        // update the value of the Status field to match the new status
+        // but if the new status is blank, send To Do
+        if (!newStatus) {
+          newStatus = 'To Do'
+        }
+        updatedMessageAttachments[0].fields[statusIndex].value = newStatus
+        // set new color of the attachment based on new status
+        updatedMessageAttachments[0].color = utils.getStatusColor(newStatus)
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
         })
         
         res.setHeader('Content-Type', 'application/json');
