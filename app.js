@@ -57,6 +57,153 @@ app.post('/interactivity', async function(req, res) {
         // slack will post OK in the channel if you just return 200
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
+      } else if (payload.actions[0].name == 'manage_tasks') {
+        // get tasks assigned to this person and planned for this week
+        const tasksAssignedToPerson = await airtable.getRecordsFromView('Tasks', {
+          view: 'All Tasks',
+          filterByFormula: `IF(Assignee='${payload.callback_id}', IF({Is Planned For This Week}=1, TRUE(), FALSE()), FALSE())`,
+          sort: [{field: 'Status', direction: 'asc'}]
+        })
+        
+        for (const task of tasksAssignedToPerson) {
+          const attachments = [{
+            callback_id: `${task.id}`,
+            attachment_type: 'default',
+            title: `${task.get('Name')}`,
+            color: utils.getStatusColor(`${task.get('Status')}`),
+            fields: [
+              {
+                title: 'Project',
+                value: `${task.get('Project Name Rollup')}`,
+                short: true
+              },
+              {
+                title: 'Status',
+                value: task.get('Status') ? task.get('Status') : 'To Do'
+              }
+            ],
+            actions: [
+              {
+                name: 'task_status_selector',
+                text: 'Update status to...',
+                type: 'select',
+                options: [
+                  {
+                    text: 'To Do',
+                    value: 'To Do'
+                  },
+                  {
+                    text: 'In Progress',
+                    value: 'In Progress'
+                  },
+                  {
+                    text: 'Blocked',
+                    value: 'Blocked'
+                  },
+                  {
+                    text: 'Done',
+                    value: 'Done'
+                  }
+                ]
+              },
+              {
+                name: 'move_task_to_next_week',
+                text: 'Move to Next Week',
+                type: 'button',
+                value: `${task.id}`
+              }
+            ]
+          }]
+          slack.sendPrivateMessage({
+            channel: payload.actions[0].value,
+            text: '',
+            attachments: attachments
+          })
+        }
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
+      } else if (payload.actions[0].name == 'move_task_to_next_week') {
+        // get the record for the next week
+        const nextWeekRecords = await airtable.getRecordsFromView('Weeks', {
+          view: 'All Weeks',
+          filterByFormula: 'IF({Is Next Week}, TRUE(), FALSE())',
+          maxRecords: 1
+        })
+        // update the task to be part of the next week
+        const updatedRecord = await airtable.updateRecord('Tasks', payload.actions[0].value, {
+          'Week': [nextWeekRecords[0].id]
+        })
+        // copy the actions of the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // get the index of the Move to Next Week button
+        const buttonIndex = updatedMessageAttachments[0].actions.findIndex((action => action.name === 'move_task_to_next_week'))
+        // update the button to become a Move Back to This Week button
+        updatedMessageAttachments[0].actions[buttonIndex].name = 'move_task_to_this_week'
+        updatedMessageAttachments[0].actions[buttonIndex].text = 'Move Back to This Week'
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
+        })
+      } else if (payload.actions[0].name == 'move_task_to_this_week') {
+        // get the record for the this week
+        const thisWeekRecords = await airtable.getRecordsFromView('Weeks', {
+          view: 'All Weeks',
+          filterByFormula: 'IF({Is This Week}, TRUE(), FALSE())',
+          maxRecords: 1
+        })
+        // update the task to be part of the this week
+        const updatedRecord = await airtable.updateRecord('Tasks', payload.actions[0].value, {
+          'Week': [thisWeekRecords[0].id]
+        })
+        // copy the actions of the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // get the index of the Move to This Week button
+        const buttonIndex = updatedMessageAttachments[0].actions.findIndex((action => action.name === 'move_task_to_this_week'))
+        // update the button to become a Move Back to This Week button
+        updatedMessageAttachments[0].actions[buttonIndex].name = 'move_task_to_next_week'
+        updatedMessageAttachments[0].actions[buttonIndex].text = 'Move to Next Week'
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
+        })
+      } else if (payload.actions[0].name == 'task_status_selector') {
+        let newStatus = payload.actions[0].selected_options[0].value
+        // slack doesnt allow for null values so we use To Do as a placeholder
+        // and then we set the newStatus to be blank here
+        if (newStatus == 'To Do') {
+          newStatus = null
+        }
+        const taskId = payload.callback_id
+        //TODO: use await here for consistency
+        const updatedRecord = await airtable.updateRecord('Tasks', taskId, {
+          'Status': newStatus
+        })
+        // create a new message by copying the original message
+        let updatedMessageAttachments = payload.original_message.attachments
+        // find the index of the Status field in the new message
+        const statusIndex = updatedMessageAttachments[0].fields.findIndex((field => field.title === 'Status'))
+        // update the value of the Status field to match the new status
+        // but if the new status is blank, send To Do
+        if (!newStatus) {
+          newStatus = 'To Do'
+        }
+        updatedMessageAttachments[0].fields[statusIndex].value = newStatus
+        // set new color of the attachment based on new status
+        updatedMessageAttachments[0].color = utils.getStatusColor(newStatus)
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: payload.original_message.text,
+          attachments: updatedMessageAttachments,
+          timestamp: payload.original_message.ts
+        })
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
       }
       break;
     case 'dialog_submission':
