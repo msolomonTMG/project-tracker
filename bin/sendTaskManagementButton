@@ -4,22 +4,24 @@ const slack = require('../slack')
 const airtable = require('../airtable')
 const utils = require('../utils')
 
-// uncomment once ready for production
-// const dayOfWeek = new Date().getDay();
-// const isFriday = dayOfWeek == 5; // 6 = Saturday, 0 = Sunday
-// 
-// if (!isFriday) {
-//   return false // only run on Fridays
-// }
+const dayOfWeek = new Date().getDay();
+const isThursday = dayOfWeek == 4; // 6 = Saturday, 0 = Sunday
+const isFriday = dayOfWeek == 5; 
 
-sendTaskManagementButton()
+if (isFriday) {
+  sendTaskManagementButton('Send Slack Reminders for Task Management on Friday')
+}
 
-async function sendTaskManagementButton() {
+if (isThursday) {
+  sendTaskManagementButton('Send Slack Reminders for Task Management on Thursday')
+}
+
+async function sendTaskManagementButton(optInColumn) {
   // get everyone who is active and has the slack reminder for task mgmt
   // check box enabled
   const people = await airtable.getRecordsFromView('People', { 
     view: 'All People',
-    filterByFormula: `IF({Active Status}='Active', IF({Send Slack Reminders for Task Management}=1, TRUE(), FALSE()), FALSE())`
+    filterByFormula: `IF({Active Status}='Active', IF({${optInColumn}}=1, TRUE(), FALSE()), FALSE())`
   })
   
   for (const person of people) {
