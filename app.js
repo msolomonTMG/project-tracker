@@ -52,11 +52,59 @@ app.post('/interactivity', async function(req, res) {
   switch(payload.type) {
     case 'interactive_message':
       if (payload.actions[0].value == 'create_status') {
-        let projectName = payload.actions[0].name
-        slack.openStatusForSpecificProjectDialog(payload.trigger_id, payload.callback_id, projectName)
+        const projectName = payload.actions[0].name
+        const state = {original_message_ts: payload.original_message.ts}
+        slack.openStatusForSpecificProjectDialog(payload.trigger_id, payload.callback_id, projectName, state)
         // slack will post OK in the channel if you just return 200
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
+      } else if (payload.actions[0].name == 'update_project_statuses') {
+        // get all non-backlogged projects where this person is the owner
+        const projectsOwnedByPerson = await airtable.getRecordsFromView('Projects', {
+          view: 'All Projects',
+          sort: [{field: 'Latest Status', direction: 'desc'}],
+          filterByFormula: `IF({Owner}="${payload.callback_id}", IF({Latest Status}!='Backlog', TRUE(), FALSE()), FALSE())`
+        })
+        // for each project, send a private message where the user can change the status
+        for (const project of projectsOwnedByPerson) {
+          const attachments = [{
+            callback_id: `${project.id}`,
+            attachment_type: 'default',
+            title: `${project.get('Name')}`,
+            color: utils.getStatusColor(`${project.get('Latest Status')}`),
+            fields: [
+              {
+                title: 'Latest Status',
+                value: project.get('Latest Status') ? project.get('Latest Status')[0] : '',
+                short: true
+              },
+              {
+                title: 'Last Updated',
+                value: project.get('Last Updated'),
+                short: true
+              },
+              {
+                title: 'Latest Update',
+                value: project.get('Latest Update') ? project.get('Latest Update')[0] : '',
+                short: false
+              }
+            ],
+            callback_id: `${project.id}`,
+            actions: [
+              {
+                name: `${project.get('Name')}`,
+                text: 'Create Status Update',
+                type: 'button',
+                value: 'create_status'
+              }
+            ]
+          }]
+          slack.sendPrivateMessage({
+            channel: payload.actions[0].value,
+            text: '',
+            attachments: attachments
+          })
+        }
       } else if (payload.actions[0].name == 'manage_tasks') {
         // get tasks assigned to this person and planned for this week
         const tasksAssignedToPerson = await airtable.getRecordsFromView('Tasks', {
@@ -224,28 +272,45 @@ app.post('/interactivity', async function(req, res) {
       }
       const newStatus = await airtable.createStatusUpdateFromDialog(payload.submission)
       console.log(newStatus)
-      slack.sendEphemeralMessage({
-        channel: payload.channel.id,
-        userId: payload.user.id,
-        text: ':white_check_mark: Status created successfully!',
-        attachments: [
-          {
-            title: newStatus.get('Project Name')[0],
-            fields: [
-              {
-                title: 'Status',
-                value: newStatus.get('Status'),
-                short: true
-              },
-              {
-                title: 'Description',
-                value: newStatus.get('Description'),
-                short: false
-              }
-            ]
-          }
-        ]
-      })
+      const attachments = [
+        {
+          title: newStatus.get('Project Name')[0],
+          color: utils.getStatusColor(newStatus.get('Status')),
+          fields: [
+            {
+              title: 'Latest Status',
+              value: newStatus.get('Status'),
+              short: true
+            },
+            {
+              title: 'Last Updated',
+              value: newStatus.get('Name'),
+              short: true
+            },
+            {
+              title: 'Latest Update',
+              value: newStatus.get('Description'),
+              short: false
+            }
+          ]
+        }
+      ]
+      if (payload.state) {
+        const state = JSON.parse(payload.state)
+        slack.updateMessage({
+          channel: payload.channel.id,
+          text: ':white_check_mark: Status created successfully!',
+          attachments: attachments,
+          timestamp: state.original_message_ts
+        })
+      } else {
+        slack.sendEphemeralMessage({
+          channel: payload.channel.id,
+          userId: payload.user.id,
+          text: ':white_check_mark: Status created successfully!',
+          attachments: attachments
+        })
+      }
       res.setHeader('Content-Type', 'application/json')
       //stupid slack needs an empty body
       res.status(200).send({})
