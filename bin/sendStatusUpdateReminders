@@ -7,9 +7,9 @@ const utils = require('../utils')
 const dayOfWeek = new Date().getDay();
 const isFriday = dayOfWeek == 5; // 6 = Saturday, 0 = Sunday
 
-// if (!isFriday) {
-//   return false // only run on Fridays
-// }
+if (!isFriday) {
+  return false // only run on Fridays
+}
 sendStatusUpdateReminders()
 
 async function sendStatusUpdateReminders() {
