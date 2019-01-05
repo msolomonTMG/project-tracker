@@ -183,7 +183,7 @@ module.exports = {
       }
       
       if (state) {
-        dialog.state = state
+        dialog.state = JSON.stringify(state)
       }
       helpers.openDialog(dialog, triggerId)
     })
