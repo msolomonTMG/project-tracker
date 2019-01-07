@@ -4,15 +4,101 @@ const slack = require('../slack')
 const airtable = require('../airtable')
 const utils = require('../utils')
 const moment = require('moment')
+const request = require('request')
 
 const dayOfWeek = new Date().getDay();
 const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
 
-if (!isMonday) {
-  return false // only run on Mondays
-}
+// if (!isMonday) {
+//   return false // only run on Mondays
+// }
 
 sendPeopleStatusReport()
+
+async function sendStatusReportEmail(statusUpdates) {
+  let emailBody = ''
+  // format the statusUpdates into an object like this
+  // { projectOwnerName: [ array of statuses ] }
+  let statusesByProjectOwners = {}
+  for (const status of statusUpdates) {
+    let projectOwnerName = status.get('Project Owner Name') ? status.get('Project Owner Name')[0] : ''
+    if (statusesByProjectOwners[projectOwnerName]) {
+      statusesByProjectOwners[projectOwnerName].statuses.push(status)
+    } else {
+      statusesByProjectOwners[projectOwnerName] = {}
+      statusesByProjectOwners[projectOwnerName].photoUrl = status.get('Project Owner Photo') ? status.get('Project Owner Photo')[0].url : ''
+      statusesByProjectOwners[projectOwnerName].statuses = [status]
+    }
+  }
+  
+  for (owner in statusesByProjectOwners) {
+    let cardMarkup = ''
+    statusesByProjectOwners[owner].statuses.forEach((status, index) => {
+      const projectName = status.get('Project Name') ? status.get('Project Name')[0] : ''
+      cardMarkup +=`
+        <div class="card border-success w-100 mb-2">
+          <div class="card-body">
+            <div class="container">
+              <div class="row">
+                <div class="col-12">
+                  <h5 class="card-title">${projectName}</h5>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <p class="card-text">
+                    <strong>Latest Status</strong><br/>
+                    ${status.get('Status')}
+                  </p>
+                </div>
+                <div class="col-6">
+                  <p class="card-text">
+                    <strong>Last Updated</strong><br/>
+                    ${status.get('Name')}
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <p class="card-text">
+                    <strong>Latest Update</strong><br/>
+                    ${status.get('Description')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      if (statusesByProjectOwners[owner].statuses.length == index + 1) {
+        let ownerRow = `
+          <div class="row">
+            <div class="col-md-2 text-center">
+              <img src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="Mike Solomon">
+            </div>
+            <div class="col-md-8">
+              ${cardMarkup}
+            </div>
+          </div>
+        `
+        emailBody += ownerRow
+      }
+    })
+  }
+  
+  
+  //console.log(emailBody)
+  const options = {
+    method: 'post',
+    body: JSON.stringify({emailBody: emailBody}),
+    url: process.env.ZAPIER_PROJECT_STATUS_EMAIL_ENDPOINT
+  }
+  
+  request(options, (err, response, body) => {
+    if (err) { console.error(err);}
+    console.log(body)
+  })
+}
 
 async function sendPeopleStatusReport() {
   console.log('here we go')
@@ -30,51 +116,53 @@ async function sendPeopleStatusReport() {
     ]
   })
   
-  let attachments = []
-  const statusesTable = 'tblOx97EkQptZq5ts'
-  const statusesView = 'viwRGjGfoLTHUYjBc'
-  for (const statusUpdate of statusUpdates) {
-    let attachment = {
-      title: statusUpdate.get('Project Name') ? statusUpdate.get('Project Name')[0] : '',
-      title_link: `https://airtable.com/${statusesTable}/${statusesView}/${statusUpdate.id}`,
-      color: utils.getStatusColor(statusUpdate.get('Status')),
-      fields: [
-        {
-          title: 'Target End Date',
-          value: statusUpdate.get('Project Target End') ? statusUpdate.get('Project Target End')[0] : '',
-          short: true
-        },
-        {
-          title: 'Progress',
-          value: statusUpdate.get('Project Progress') ? `${Math.round(statusUpdate.get('Project Progress')[0])}%` : '',
-          short: true
-        },
-        {
-          title: 'Owner',
-          value: statusUpdate.get('Project Owner Name') ? statusUpdate.get('Project Owner Name')[0] : '',
-          short: true
-        },
-        {
-          title: 'Status',
-          value: statusUpdate.get('Status'),
-          short: true
-        },
-        {
-          title: 'Description',
-          value: statusUpdate.get('Description'),
-          short: false
-        }
-      ],
-      footer: 'Last Updated',
-      ts: moment(statusUpdate.get('Created')).unix()
-    }
-    
-    attachments.push(attachment)
-  }
+  sendStatusReportEmail(statusUpdates)
   
-  slack.sendWebhook({
-    text: ':wave: Here is the People Team status report!',
-    attachments: attachments,
-    webhook: process.env.PEOPLE_STATUS_UPDATES_SLACK_CHANNEL
-  })
+  // let attachments = []
+  // const statusesTable = 'tblOx97EkQptZq5ts'
+  // const statusesView = 'viwRGjGfoLTHUYjBc'
+  // for (const statusUpdate of statusUpdates) {
+  //   let attachment = {
+  //     title: statusUpdate.get('Project Name') ? statusUpdate.get('Project Name')[0] : '',
+  //     title_link: `https://airtable.com/${statusesTable}/${statusesView}/${statusUpdate.id}`,
+  //     color: utils.getStatusColor(statusUpdate.get('Status')),
+  //     fields: [
+  //       {
+  //         title: 'Target End Date',
+  //         value: statusUpdate.get('Project Target End') ? statusUpdate.get('Project Target End')[0] : '',
+  //         short: true
+  //       },
+  //       {
+  //         title: 'Progress',
+  //         value: statusUpdate.get('Project Progress') ? `${Math.round(statusUpdate.get('Project Progress')[0])}%` : '',
+  //         short: true
+  //       },
+  //       {
+  //         title: 'Owner',
+  //         value: statusUpdate.get('Project Owner Name') ? statusUpdate.get('Project Owner Name')[0] : '',
+  //         short: true
+  //       },
+  //       {
+  //         title: 'Status',
+  //         value: statusUpdate.get('Status'),
+  //         short: true
+  //       },
+  //       {
+  //         title: 'Description',
+  //         value: statusUpdate.get('Description'),
+  //         short: false
+  //       }
+  //     ],
+  //     footer: 'Last Updated',
+  //     ts: moment(statusUpdate.get('Created')).unix()
+  //   }
+  // 
+  //   attachments.push(attachment)
+  // }
+  // 
+  // slack.sendWebhook({
+  //   text: ':wave: Here is the People Team status report!',
+  //   attachments: attachments,
+  //   webhook: process.env.PEOPLE_STATUS_UPDATES_SLACK_CHANNEL
+  // })
 }
