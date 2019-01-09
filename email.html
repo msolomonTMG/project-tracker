@@ -23,6 +23,9 @@
       img {
         border-radius: 50%;
       }
+      .mobile-only {
+        display: none;
+      }
       .avatar-div {
         display: none;
         text-align: center;
@@ -64,6 +67,12 @@
         border:solid #8B46FF 1px !important;
       }
       @media only screen and (max-width: 480px){
+        .mobile-only {
+          display: block;
+        }
+        .desktop-only {
+          display: none;
+        }
         .avatar-cell {
           display: none;
         }
@@ -100,7 +109,7 @@
             <tr>
               <td><h3>Digit Intranet</h3></td>
             </tr>
-            <tr>
+            <tr class="desktop-only">
               <td class="w-50">
                 <strong>
                   <i class="fa fa-traffic-light"></i>
@@ -114,8 +123,33 @@
                 </strong>
               </td>
             </tr>
-            <tr>
+            <tr class="desktop-only">
               <td>Green</td><td>2019-01-09</td>
+            </tr>
+            <tr class="mobile-only">
+              <td colspan="2">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+            </tr>
+            <tr class="mobile-only">
+              <td colspan="2">Green</td>
+            </tr>
+            <tr class="mobile-only">
+              <td colspan="2"><br></td>
+            </tr>
+            <tr class="mobile-only">
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
+            </tr>
+            <tr class="mobile-only">
+              <td colspan="2">2019-01-09</td>
             </tr>
             <tr>
               <td colspan="2"><br></td>
