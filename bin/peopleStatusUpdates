@@ -26,64 +26,98 @@ async function sendStatusReportEmail(statusUpdates) {
       statusesByProjectOwners[projectOwnerName].statuses.push(status)
     } else {
       statusesByProjectOwners[projectOwnerName] = {}
+      statusesByProjectOwners[projectOwnerName].name = projectOwnerName
       statusesByProjectOwners[projectOwnerName].photoUrl = status.get('Project Owner Photo') ? status.get('Project Owner Photo')[0].url : ''
       statusesByProjectOwners[projectOwnerName].statuses = [status]
     }
   }
   
   for (owner in statusesByProjectOwners) {
-    let cardMarkup = ''
-    statusesByProjectOwners[owner].statuses.forEach((status, index) => {
+    let projectTables = ''
+    for (const [index, status] of statusesByProjectOwners[owner].statuses.entries()) {
       const projectName = status.get('Project Name') ? status.get('Project Name')[0] : ''
-      cardMarkup +=`
-        <div class="card border-success w-100 mb-2">
-          <div class="card-body">
-            <div class="container">
-              <div class="row">
-                <div class="col-12">
-                  <h5 class="card-title">${projectName}</h5>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-6">
-                  <p class="card-text">
-                    <strong>Latest Status</strong><br/>
-                    ${status.get('Status')}
-                  </p>
-                </div>
-                <div class="col-6">
-                  <p class="card-text">
-                    <strong>Last Updated</strong><br/>
-                    ${status.get('Name')}
-                  </p>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-12">
-                  <p class="card-text">
-                    <strong>Latest Update</strong><br/>
-                    ${status.get('Description')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      const statusNoSpaces = status.get('Status').replace(/\s/g, '');
+      const projectTable = `
+        <table class="project-table ${statusNoSpaces}">
+          <tr>
+            <td><h3>${projectName}</h3></td>
+          </tr>
+          <tr class="desktop-only">
+            <td class="w-50">
+              <strong>
+                <i class="fa fa-traffic-light"></i>
+                Latest Status
+              </strong>
+            </td>
+            <td class="w-50">
+              <strong>
+                <i class="fas fa-clock"></i>
+                Last Updated
+              </strong>
+            </td>
+          </tr>
+          <tr class="desktop-only">
+            <td>${status.get('Status')}</td><td>${status.get('Name')}</td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">
+              <strong>
+                <i class="fa fa-traffic-light"></i>
+                Latest Status
+              </strong>
+            </td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">${status.get('Status')}</td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2"><br></td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">
+              <strong>
+                <i class="fas fa-clock"></i>
+                Last Updated
+              </strong>
+            </td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">${status.get('Name')}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><br></td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <strong>
+                <i class="fas fa-align-left"></i>
+                Latest Update
+              </strong>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">${status.get('Description')}</td>
+          </tr>
+        </table>
       `
-      if (statusesByProjectOwners[owner].statuses.length == index + 1) {
-        let ownerRow = `
-          <div class="row">
-            <div class="col-md-2 text-center">
-              <img src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="Mike Solomon">
-            </div>
-            <div class="col-md-8">
-              ${cardMarkup}
-            </div>
-          </div>
-        `
-        emailBody += ownerRow
-      }
-    })
+      projectTables += projectTable
+    }
+    let ownerTable = `
+      <table style="padding: 25px;">
+        <div class="avatar-div">
+          <img src="${owner.photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+        </div>
+        <tr>
+          <td align="center" style="vertical-align: top;" class="avatar-cell">
+            <img src="${owner.photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+          </td>
+          <td width="80%">
+            ${projectTables}
+          </td>
+        </tr>
+      </table>
+    `
+    emailBody += ownerTable
   }
   
   
