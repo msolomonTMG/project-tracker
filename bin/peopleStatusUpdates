@@ -27,7 +27,7 @@ async function sendStatusReportEmail(statusUpdates) {
     } else {
       statusesByProjectOwners[projectOwnerName] = {}
       statusesByProjectOwners[projectOwnerName].name = projectOwnerName
-      statusesByProjectOwners[projectOwnerName].photoUrl = status.get('Project Owner Photo') ? status.get('Project Owner Photo')[0].url : ''
+      statusesByProjectOwners[projectOwnerName].photoUrl = status.get('Project Owner Photo') ? status.get('Project Owner Photo')[0].url : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
       statusesByProjectOwners[projectOwnerName].statuses = [status]
     }
   }
@@ -45,13 +45,13 @@ async function sendStatusReportEmail(statusUpdates) {
           <tr class="desktop-only">
             <td class="w-50">
               <strong>
-                <i class="fa fa-traffic-light"></i>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805106">
                 Latest Status
               </strong>
             </td>
             <td class="w-50">
               <strong>
-                <i class="fas fa-clock"></i>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805107">
                 Last Updated
               </strong>
             </td>
@@ -62,7 +62,7 @@ async function sendStatusReportEmail(statusUpdates) {
           <tr class="mobile-only">
             <td colspan="2">
               <strong>
-                <i class="fa fa-traffic-light"></i>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805106">
                 Latest Status
               </strong>
             </td>
@@ -76,7 +76,7 @@ async function sendStatusReportEmail(statusUpdates) {
           <tr class="mobile-only">
             <td colspan="2">
               <strong>
-                <i class="fas fa-clock"></i>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805107">
                 Last Updated
               </strong>
             </td>
@@ -90,7 +90,7 @@ async function sendStatusReportEmail(statusUpdates) {
           <tr>
             <td colspan="2">
               <strong>
-                <i class="fas fa-align-left"></i>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805105">
                 Latest Update
               </strong>
             </td>
@@ -105,11 +105,11 @@ async function sendStatusReportEmail(statusUpdates) {
     let ownerTable = `
       <table style="padding: 25px;">
         <div class="avatar-div">
-          <img src="${owner.photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+          <img class="avatar" src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
         </div>
         <tr>
           <td align="center" style="vertical-align: top;" class="avatar-cell">
-            <img src="${owner.photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+            <img class="avatar" src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
           </td>
           <td width="80%">
             ${projectTables}
