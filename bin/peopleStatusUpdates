@@ -4,6 +4,7 @@ const slack = require('../slack')
 const airtable = require('../airtable')
 const utils = require('../utils')
 const moment = require('moment')
+const request = require('request')
 
 const dayOfWeek = new Date().getDay();
 const isMonday = dayOfWeek == 1; // 6 = Saturday, 0 = Sunday
@@ -30,6 +31,129 @@ async function sendPeopleStatusReport() {
     ]
   })
   
+  sendStatusReportEmail(statusUpdates)
+  sendStatusReportSlack(statusUpdates)
+}
+
+async function sendStatusReportEmail(statusUpdates) {
+  let emailBody = ''
+  // format the statusUpdates into an object like this
+  // { projectOwnerName: [ array of statuses ] }
+  let statusesByProjectOwners = {}
+  for (const status of statusUpdates) {
+    let projectOwnerName = status.get('Project Owner Name') ? status.get('Project Owner Name')[0] : ''
+    if (statusesByProjectOwners[projectOwnerName]) {
+      statusesByProjectOwners[projectOwnerName].statuses.push(status)
+    } else {
+      statusesByProjectOwners[projectOwnerName] = {}
+      statusesByProjectOwners[projectOwnerName].name = projectOwnerName
+      statusesByProjectOwners[projectOwnerName].photoUrl = status.get('Project Owner Photo') ? status.get('Project Owner Photo')[0].url : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
+      statusesByProjectOwners[projectOwnerName].statuses = [status]
+    }
+  }
+  
+  for (owner in statusesByProjectOwners) {
+    let projectTables = ''
+    for (const [index, status] of statusesByProjectOwners[owner].statuses.entries()) {
+      const projectName = status.get('Project Name') ? status.get('Project Name')[0] : ''
+      const statusNoSpaces = status.get('Status').replace(/\s/g, '');
+      const projectTable = `
+        <table class="project-table ${statusNoSpaces}">
+          <tr>
+            <td><h3>${projectName}</h3></td>
+          </tr>
+          <tr class="desktop-only">
+            <td class="w-50">
+              <strong>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805106">
+                Latest Status
+              </strong>
+            </td>
+            <td class="w-50">
+              <strong>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805107">
+                Last Updated
+              </strong>
+            </td>
+          </tr>
+          <tr class="desktop-only">
+            <td>${status.get('Status')}</td><td>${status.get('Name')}</td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">
+              <strong>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805106">
+                Latest Status
+              </strong>
+            </td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">${status.get('Status')}</td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2"><br></td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">
+              <strong>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805107">
+                Last Updated
+              </strong>
+            </td>
+          </tr>
+          <tr class="mobile-only">
+            <td colspan="2">${status.get('Name')}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><br></td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <strong>
+                <img class="icon" src="https://assets3.thrillist.com/v1/image/2805105">
+                Latest Update
+              </strong>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">${status.get('Description')}</td>
+          </tr>
+        </table>
+      `
+      projectTables += projectTable
+    }
+    let ownerTable = `
+      <table style="padding: 25px;">
+        <div class="avatar-div">
+          <img class="avatar" src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+        </div>
+        <tr>
+          <td align="center" style="vertical-align: top;" class="avatar-cell">
+            <img class="avatar" src="${statusesByProjectOwners[owner].photoUrl}" class="rounded-circle mb-2" height="100px" alt="${owner.name}">
+          </td>
+          <td width="80%">
+            ${projectTables}
+          </td>
+        </tr>
+      </table>
+    `
+    emailBody += ownerTable
+  }
+  
+  const options = {
+    method: 'post',
+    body: JSON.stringify({emailBody: emailBody}),
+    url: process.env.ZAPIER_PROJECT_STATUS_EMAIL_ENDPOINT
+  }
+  
+  request(options, (err, response, body) => {
+    if (err) { console.error(err);}
+    console.log(body)
+  })
+}
+
+
+async function sendStatusReportSlack(statusUpdates) {
   let attachments = []
   const statusesTable = 'tblOx97EkQptZq5ts'
   const statusesView = 'viwRGjGfoLTHUYjBc'
@@ -68,7 +192,7 @@ async function sendPeopleStatusReport() {
       footer: 'Last Updated',
       ts: moment(statusUpdate.get('Created')).unix()
     }
-    
+  
     attachments.push(attachment)
   }
   
