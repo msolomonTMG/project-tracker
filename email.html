@@ -23,6 +23,10 @@
       img {
         border-radius: 50%;
       }
+      .avatar-div {
+        display: none;
+        text-align: center;
+      }
       .header-title {
         text-align: center;
       }
@@ -38,9 +42,33 @@
       .w-50 {
         width: 50%;
       }
+      .green {
+        border:solid #21C932 1px !important;
+      }
+      .yellow {
+        border:solid #FCB400 1px !important;
+      }
+      .red {
+        border:solid #F82C60 1px !important;
+      }
+      .planning {
+        border:solid #1DD9D2 1px !important;
+      }
+      .backlog {
+        border:solid #D5D5D5 1px !important;
+      }
+      .blocked-internal {
+        border:solid #2C7FF9 1px !important;
+      }
+      .blocked-external {
+        border:solid #8B46FF 1px !important;
+      }
       @media only screen and (max-width: 480px){
         .avatar-cell {
           display: none;
+        }
+        .avatar-div {
+          display: block;
         }
         td {
           width: 100% !important;
@@ -60,14 +88,53 @@
       </tr>
     </table>
     <table style="padding: 25px;">
+      <div class="avatar-div">
+        <img src="https://dl.airtable.com/BWZleMzzQFi3mKI7bNus_mike.jpeg" class="rounded-circle mb-2" height="100px" alt="Mike Solomon">
+      </div>
       <tr>
         <td align="center" style="vertical-align: top;" class="avatar-cell">
           <img src="https://dl.airtable.com/BWZleMzzQFi3mKI7bNus_mike.jpeg" class="rounded-circle mb-2" height="100px" alt="Mike Solomon">
         </td>
         <td width="80%">
-          <table class="project-table">
+          <table class="project-table green">
             <tr>
-              <td><h3>Project Name</h3></td>
+              <td><h3>Digit Intranet</h3></td>
+            </tr>
+            <tr>
+              <td class="desktop-only w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="desktop-only w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td>Green</td><td>2019-01-09</td>
+            </tr>
+            <tr>
+              <td colspan="2"><br></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
+            </tr>
+          </table>
+          <table class="project-table yellow">
+            <tr>
+              <td><h3>Digit Intranet</h3></td>
             </tr>
             <tr>
               <td class="w-50">
@@ -87,6 +154,9 @@
               <td>Green</td><td>2019-01-09</td>
             </tr>
             <tr>
+              <td colspan="2"><br></td>
+            </tr>
+            <tr>
               <td colspan="2">
                 <strong>
                   <i class="fas fa-align-left"></i>
@@ -98,38 +168,184 @@
               <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
             </tr>
           </table>
-          <table class="project-table">
+          <table class="project-table red">
             <tr>
-              <td><h3>Project Name</h3></td>
+              <td><h3>Digit Intranet</h3></td>
             </tr>
             <tr>
-              <td class="w-50"><strong>Latest Status</strong</td><td class="w-50"><strong>Last Updated</strong></td>
+              <td class="w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
             </tr>
             <tr>
               <td>Green</td><td>2019-01-09</td>
             </tr>
             <tr>
-              <td><strong>Latest Update</strong></td>
+              <td colspan="2"><br></td>
             </tr>
             <tr>
-              <td>Here is the update. Theres obviously a lot to say here so here we go.</td>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
             </tr>
           </table>
-          <table class="project-table">
+          <table class="project-table planning">
             <tr>
-              <td><h3>Project Name</h3></td>
+              <td><h3>Digit Intranet</h3></td>
             </tr>
             <tr>
-              <td class="w-50"><strong>Latest Status</strong</td><td class="w-50"><strong>Last Updated</strong></td>
+              <td class="w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
             </tr>
             <tr>
               <td>Green</td><td>2019-01-09</td>
             </tr>
             <tr>
-              <td><strong>Latest Update</strong></td>
+              <td colspan="2"><br></td>
             </tr>
             <tr>
-              <td>Here is the update. Theres obviously a lot to say here so here we go.</td>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
+            </tr>
+          </table>
+          <table class="project-table blocked-external">
+            <tr>
+              <td><h3>Digit Intranet</h3></td>
+            </tr>
+            <tr>
+              <td class="w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td>Green</td><td>2019-01-09</td>
+            </tr>
+            <tr>
+              <td colspan="2"><br></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
+            </tr>
+          </table>
+          <table class="project-table blocked-internal">
+            <tr>
+              <td><h3>Digit Intranet</h3></td>
+            </tr>
+            <tr>
+              <td class="w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td>Green</td><td>2019-01-09</td>
+            </tr>
+            <tr>
+              <td colspan="2"><br></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
+            </tr>
+          </table>
+          <table class="project-table backlog">
+            <tr>
+              <td><h3>Digit Intranet</h3></td>
+            </tr>
+            <tr>
+              <td class="w-50">
+                <strong>
+                  <i class="fa fa-traffic-light"></i>
+                  Latest Status
+                </strong>
+              </td>
+              <td class="w-50">
+                <strong>
+                  <i class="fas fa-clock"></i>
+                  Last Updated
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td>Green</td><td>2019-01-09</td>
+            </tr>
+            <tr>
+              <td colspan="2"><br></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <strong>
+                  <i class="fas fa-align-left"></i>
+                  Latest Update
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</td>
             </tr>
           </table>
         </td>
