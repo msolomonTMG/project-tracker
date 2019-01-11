@@ -59,11 +59,11 @@ app.post('/interactivity', async function(req, res) {
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send()
       } else if (payload.actions[0].name == 'update_project_statuses') {
-        // get all non-backlogged projects where this person is the owner
+        // get all non-backlogged, not-done projects where this person is the owner
         const projectsOwnedByPerson = await airtable.getRecordsFromView('Projects', {
           view: 'All Projects',
           sort: [{field: 'Latest Status', direction: 'desc'}],
-          filterByFormula: `IF({Owner}="${payload.callback_id}", IF({Latest Status}!='Backlog', TRUE(), FALSE()), FALSE())`
+          filterByFormula: `IF({Owner}="${payload.callback_id}", IF({Is Active}=1, TRUE(), FALSE()), FALSE())`
         })
         // for each project, send a private message where the user can change the status
         for (const project of projectsOwnedByPerson) {
