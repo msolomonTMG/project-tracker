@@ -13,11 +13,11 @@ if (!isFriday) {
 sendStatusUpdateReminders()
 
 async function sendStatusUpdateReminders() {
-  // get everyone who is active and has the slack reminder for status updates
-  // checkbox enabled
+  // get everyone who is active, has the slack reminder for status updates
+  // checkbox enabled, and owns an active project (not backlogged or done)
   const people = await airtable.getRecordsFromView('People', {
-    view: 'All People',
-    filterByFormula: `IF({Send Slack Reminders for Status Updates}=1, TRUE(), FALSE())`
+    view: 'Active People',
+    filterByFormula: `IF({Send Slack Reminders for Status Updates}=1, IF({Owns Active Projects}=1, TRUE(), FALSE()), FALSE())`
   })
   for (const person of people) {
     slack.sendPrivateMessage({
