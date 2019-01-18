@@ -18,10 +18,10 @@ if (isThursday) {
 
 async function sendTaskManagementButton(optInColumn) {
   // get everyone who is active and has the slack reminder for task mgmt
-  // check box enabled
+  // check box enabled and has tasks this week
   const people = await airtable.getRecordsFromView('People', { 
     view: 'All People',
-    filterByFormula: `IF({Active Status}='Active', IF({${optInColumn}}=1, TRUE(), FALSE()), FALSE())`
+    filterByFormula: `IF({Active Status}='Active', IF({${optInColumn}}=1, IF({Number of Tasks Assigned This Week} > 0, TRUE(),FALSE()),FALSE()), FALSE())`
   })
   
   for (const person of people) {
