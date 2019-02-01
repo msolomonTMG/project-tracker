@@ -105,6 +105,9 @@ app.post('/interactivity', async function(req, res) {
             attachments: attachments
           })
         }
+        // slack will post OK in the channel if you just return 200
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send()
       } else if (payload.actions[0].name == 'manage_tasks') {
         // get tasks assigned to this person and planned for this week
         const tasksAssignedToPerson = await airtable.getRecordsFromView('Tasks', {
