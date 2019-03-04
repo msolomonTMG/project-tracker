@@ -32,7 +32,8 @@ async function sendPeopleStatusReport() {
   })
   
   sendStatusReportEmail(statusUpdates)
-  sendStatusReportSlack(statusUpdates)
+  // we don't want these right now
+  // sendStatusReportSlack(statusUpdates)
 }
 
 async function sendStatusReportEmail(statusUpdates) {
